@@ -4,6 +4,7 @@
 util.require_natives(1640181023)
 require("smokelib")
 require("Universal_WeaponsNamesHashesTable")
+require("Universal_ped_list")
 util.keep_running()
 local alist = false
 local hgui = false
@@ -28,9 +29,13 @@ local getPlayerPed = PLAYER.GET_PLAYER_PED
 AIM_BLACKLIST = {}
 
 local function playerFeatures(pid)
-    menu.divider(menu.player_root(pid), "Smoked.lua")
-    menu.toggle(menu.player_root(pid), "Blacklist Player from Aimbot", {"blacklist"}, "", function (toggle)
+    local playerRoot = menu.player_root(pid)
+    menu.divider(playerRoot, "Smoked.lua")
+    menu.toggle(playerRoot, "Blacklist Player from Aimbot", {"blacklist"}, "", function (toggle)
         AIM_BLACKLIST[pid] = toggle
+    end)
+    menu.action(playerRoot, "test", {}, "", function ()
+        util.toast("worked!")
     end)
 end
 
