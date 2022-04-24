@@ -329,3 +329,31 @@ function MakeGuiButton(x, y, distfromtext, outlinewidth, colormain, coloroutline
         -dragged x,y. We will need to use this as a param for running the func next frame.
     ]]
 end
+
+function DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
+    local localped = GetLocalPed()
+    -- <> <> <> <> Background Stuff <> <> <> <> --
+    DrawRect(0.0, 0.0, 1.0, 1.0, {r = 0, g = 0, b = 0, a = blackBGAlpha})
+    DrawTexture(hgui_smoke, 0.05, 0.05, 0.5, 0.5, 0.5, 0.5, 0, WhiteText)
+    DrawText(0.5, 0.55, "Remember to hold Right-Click When Dragging Stuff ;)", ALIGN_CENTRE, 0.4, WhiteText, false)
+    -- <> <> <> <> Background Stuff <> <> <> <> --
+
+    -- <> <> <> <> Freeze Stuff <> <> <> <> --
+    if hgui_freeze then
+        ENTITY.FREEZE_ENTITY_POSITION(localped, true)
+        ENTITY.SET_ENTITY_ROTATION(localped, plrot.x, plrot.y, plrot.z, 2, true)
+    else ENTITY.FREEZE_ENTITY_POSITION(localped, false) end
+    -- <> <> <> <> Freeze Stuff <> <> <> <> --
+
+    -- <> <> <> <> Attack Stuff <> <> <> <> --
+    PLAYER.DISABLE_PLAYER_FIRING(players.user(), true)
+    -- <> <> <> <> Attack Stuff <> <> <> <> --
+end
+
+function DrawCursorGUI(hgui_cigarrette)
+    -- <> <> <> <> Cursor Draw <> <> <> <> -- (drawn at the bottom to make cursor render over the thing)
+    HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
+    local xx, yy = GetCursorLocation()
+    DrawTexture(hgui_cigarrette, 0.006, 0.006, xx, yy, xx, yy, 0, WhiteText)
+    -- <> <> <> <> Cursor Draw <> <> <> <> --
+end
