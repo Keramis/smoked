@@ -233,58 +233,13 @@ menu.toggle(hguilist, "Enable Hacked Client GUI", {}, "Bind this to a key.", fun
     hgui = toggle
     local plrot = ENTITY.GET_ENTITY_ROTATION(localped, 2)
     while hgui do
-        local localped = GetLocalPed()
-        -- <> <> <> <> Background Stuff <> <> <> <> --
-        DrawRect(0.0, 0.0, 1.0, 1.0, {r = 0, g = 0, b = 0, a = blackBGAlpha})
-        DrawTexture(hgui_smoke, 0.05, 0.05, 0.5, 0.5, 0.5, 0.5, 0, WhiteText)
-        DrawText(0.5, 0.55, "Remember to hold Right-Click When Dragging Stuff ;)", ALIGN_CENTRE, 0.4, WhiteText, false)
-        -- <> <> <> <> Background Stuff <> <> <> <> --
+        DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
+        --draw shit here
 
-        -- <> <> <> <> Freeze Stuff <> <> <> <> --
-        if hgui_freeze then
-            ENTITY.FREEZE_ENTITY_POSITION(localped, true)
-            ENTITY.SET_ENTITY_ROTATION(localped, plrot.x, plrot.y, plrot.z, 2, true)
-        else ENTITY.FREEZE_ENTITY_POSITION(localped, false) end
-        PAD.DISABLE_CONTROL_ACTION(0, 270, true)-- 270	INPUT_LOOK_LEFT	MOUSE RIGHT	RIGHT STICK
-        PAD.DISABLE_CONTROL_ACTION(0, 271, true)-- 271	INPUT_LOOK_RIGHT	MOUSE RIGHT	RIGHT STICK
-        PAD.DISABLE_CONTROL_ACTION(0, 272, true)-- 272	INPUT_LOOK_UP	MOUSE DOWN	RIGHT STICK
-        PAD.DISABLE_CONTROL_ACTION(0, 273, true)-- 273	INPUT_LOOK_DOWN	MOUSE DOWN	RIGHT STICK
-        -- <> <> <> <> Freeze Stuff <> <> <> <> --
-
-        -- <> <> <> <> Attack Stuff <> <> <> <> --
-        PLAYER.DISABLE_PLAYER_FIRING(players.user(), true)
-        -- <> <> <> <> Attack Stuff <> <> <> <> --
-
-        -- <> <> <> <> Cursor Draw <> <> <> <> --
-        HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
-        local xx, yy = GetCursorLocation()
-        DrawTexture(hgui_cigarrette, 0.006, 0.006, xx, yy, xx, yy, 0, WhiteText)
-        -- <> <> <> <> Cursor Draw <> <> <> <> --
-
-        --176 || INPUT_CELLPHONE_SELECT || ENTER / LEFT MOUSE BUTTON
-        --DrawRectUsingMiddlePoint(0.5, 0.5, 0.05, 0.05, WhiteText)
-        local check1
-        if not SilentAimbot then
-            check1 = DrawRect_Outline_MidPoint_Text(tab1x, tab1y, 0.005, 0.001, BlackText, WhiteText, WhiteText, 0.8, "Silent Aimbot" .. " (off)")
-        else
-            check1 = DrawRect_Outline_MidPoint_Text(tab1x, tab1y, 0.005, 0.001, BlackText, WhiteText, WhiteText, 0.8, "Silent Aimbot" .. " (on)")
-        end
-        PAD.DISABLE_CONTROL_ACTION(0, 176, true)
-        if CheckForControlPressedOnScreen(check1[1], check1[2], check1[3], check1[4], 348) then --348 || INPUT_MAP_POI || SCROLLWHEEL BUTTON (PRESS)
-            tab1x = xx
-            tab1y = yy
-        end
-        if CheckForControlJustPressedOnScreen(check1[1], check1[2], check1[3], check1[4], 18) then --237	INPUT_CURSOR_ACCEPT	LEFT MOUSE BUTTON ><<> 18	INPUT_SKIP_CUTSCENE	ENTER / LEFT MOUSE BUTTON / SPACEBAR
-            menu.trigger_commands("smokesilentaim")
-        end
+        DrawCursorGUI(hgui_cigarrette)
         wait()
     end
     ENTITY.FREEZE_ENTITY_POSITION(GetLocalPed(), false)
-    PAD.DISABLE_CONTROL_ACTION(0, 270, false)
-    PAD.DISABLE_CONTROL_ACTION(0, 271, false)
-    PAD.DISABLE_CONTROL_ACTION(0, 272, false)
-    PAD.DISABLE_CONTROL_ACTION(0, 273, false)
-    PAD.DISABLE_CONTROL_ACTION(0, 176, false)
 end)
 menu.toggle(hguilist, "Freeze Player Position while in GUI", {}, "", function (tog)
     hgui_freeze = tog
