@@ -154,6 +154,18 @@ function DrawRectWithOutlineUsingMiddlePoint(pointx, pointy, width, height, colo
     --right rectangle
     directx.draw_rect(topLeft.x + width, topLeft.y - amountpadding, amountpadding, height + amountpadding * 2, colorpadding)
 end
+function DrawRect_Outline_MidPoint_Text(pointx, pointy, amountpaddingfromtext, amountoutline, colormain, coloroutline, colortext, scaletext, stringtext)
+    local txtw, txth = directx.get_text_size(stringtext, scaletext)
+    DrawRectWithOutlineUsingMiddlePoint(pointx, pointy, txtw + (amountpaddingfromtext * 2), txth + (amountpaddingfromtext * 2), colormain, coloroutline, amountoutline)
+    --draw text below this one, since it renders last, therefore on top.
+    directx.draw_text(pointx, pointy, stringtext, ALIGN_CENTRE, scaletext, colortext, false)
+    --return for calculating inputs in the area
+    local x1 = (pointx - txtw - amountpaddingfromtext - amountoutline) --[[startx]]
+    local y1 = (pointy - txth - amountpaddingfromtext - amountoutline) --[[starty]]
+    local x2 = (pointx + txtw + amountpaddingfromtext + amountoutline) --[[endx]]
+    local y2 = (pointy + txth + amountpaddingfromtext + amountoutline) --[[endy]]
+    return {x1, y1, x2, y2}
+end
 function DrawTexture(id, sizex, sizey, centerx, centery, posx, posy, rotation, color)
     directx.draw_texture(id, sizex, sizey, centerx, centery, posx, posy, rotation, color)
 end
