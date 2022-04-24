@@ -294,3 +294,38 @@ function CheckForControlPressedOnScreen(startx, starty, endx, endy, intcontrol)
     end
     return false
 end
+
+function MakeGuiButton(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext1, stringtext2, buttonpressactivate, buttonpressdrag, funcToTrigger, commandToTrigger, defaultactive)
+    local mX, mY = GetCursorLocation() --get cursor location
+    local retX, retY = x, y
+    local ac
+    ac = defaultactive
+    local bc1
+    HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
+    --String drawing for active state.
+    if not ac then --if it's false, then we do text option 1
+        bc1 = DrawRect_Outline_MidPoint_Text(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext1)
+    elseif ac then -- if it's true, then we do text option 2
+        bc1 = DrawRect_Outline_MidPoint_Text(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext2)
+    end
+    if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressactivate) then
+        if funcToTrigger then
+            funcToTrigger()
+        elseif commandToTrigger then
+            menu.trigger_commands(tostring(commandToTrigger))
+        end
+        ac = not ac
+    end
+    if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressdrag) then
+        retX = mX
+        retY = mY
+    end
+
+    return retX, retY, ac
+
+    --returns button top left x,y || bottom right x,y >|> to use for checking for button presses
+    --[[at the end we need to return:
+        -active string (1/2). We will need to use this as a param for running the func next frame.
+        -dragged x,y. We will need to use this as a param for running the func next frame.
+    ]]
+end
