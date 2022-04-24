@@ -50,7 +50,7 @@ menu.divider(menuroot, "Smoked.lua")
 --     DrawText(0.5, 0.5, "TTT", 1, 0.6, WhiteText, false)
 -- end)
 
-local oppressor_aimbot = menu.list(menuroot, "Oppressor Aimbot", {}, "")
+local oppressor_aimbot = menu.list(menuroot, "Oppressor Aimbot", {"smokeoppressoraim"}, "")
 local missile_speed = 100
 local missile_ptfx = false
 menu.toggle(oppressor_aimbot, FEATURES[1][2], {}, "", function (on)
@@ -113,7 +113,7 @@ local silent_aimbot_head = false
 local silent_aimbot_body = false
 local silent_aimbot_pelvis = false
 local silent_aimbot_legs = false
-menu.toggle(silent_aimbot, FEATURES[2][2], {"silentaim"}, "Improved silent aimbot, to disable firing upon shooting.", function (on)
+menu.toggle(silent_aimbot, FEATURES[2][2], {"smokesilentaim"}, "Improved silent aimbot, to disable firing upon shooting.", function (on)
     local ourPed = GetLocalPed()
     FEATURES[2][1] = on
     SilentAimbot = on
@@ -170,6 +170,19 @@ for i = 1, #GLOBAL_WEAPONS_NAMES_HASHES_TABLE do
         silent_aimbot_chooseWP = wpstr
     end)
 end
+
+local function toasttest()
+    util.toast("activated!")
+end
+local test1
+local test2
+test1 = 0.5
+test2 = 0.5
+local test3
+test3 = false
+menu.toggle_loop(menuroot, "test", {}, "", function ()
+    test1, test2, test3 = MakeGuiButton(test1, test2, 0.005, 0.001, BlackText, WhiteText, WhiteText, 0.8, "Text1", "text2", 18, 348, toasttest, false, test3)
+end)
 
 --===================================================================================================================
 --===================================================================================================================
@@ -261,8 +274,8 @@ menu.toggle(hguilist, "Enable Hacked Client GUI", {}, "Bind this to a key.", fun
             tab1x = xx
             tab1y = yy
         end
-        if CheckForControlJustPressedOnScreen(check1[1], check1[2], check1[3], check1[4], 237) then --237	INPUT_CURSOR_ACCEPT	LEFT MOUSE BUTTON
-            menu.trigger_commands("silentaim")
+        if CheckForControlJustPressedOnScreen(check1[1], check1[2], check1[3], check1[4], 18) then --237	INPUT_CURSOR_ACCEPT	LEFT MOUSE BUTTON ><<> 18	INPUT_SKIP_CUTSCENE	ENTER / LEFT MOUSE BUTTON / SPACEBAR
+            menu.trigger_commands("smokesilentaim")
         end
         wait()
     end
