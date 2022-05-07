@@ -42,14 +42,6 @@ players.dispatch_on_join()
 
 menu.divider(menuroot, "Smoked.lua")
 
--- menu.toggle_loop(menuroot, "text test", {}, "", function ()
---     local p = 0.008
---     local aa, bb = GetTopLeftCornerOfText(0.5, 0.5, "TTT",  0.6)
---     local ww, hh = directx.get_text_size("TTT", 0.6)
---     DrawRect(aa - p, bb - p, ww + p*2, hh + p*2, BlackText)
---     DrawText(0.5, 0.5, "TTT", 1, 0.6, WhiteText, false)
--- end)
-
 local oppressor_aimbot = menu.list(menuroot, "Oppressor Aimbot", {"smokeoppressoraim"}, "")
 local missile_speed = 100
 local missile_ptfx = false
@@ -66,31 +58,37 @@ menu.toggle(oppressor_aimbot, FEATURES[1][2], {}, "", function (on)
         local localPed = getPlayerPed(players.user())
         local localcoords = getEntityCoords(localPed)
         local Missile = OBJECT.GET_CLOSEST_OBJECT_OF_TYPE(localcoords.x, localcoords.y, localcoords.z, 10, rockethash, false, true, true, true)
-        local closestPlayer = GetClosestPlayerWithRange_PIDBlacklist(500, AIM_BLACKLIST)
-        if (Missile ~= 0) and (closestPlayer) and (not PED.IS_PED_DEAD_OR_DYING(closestPlayer)) then
-            if ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(localPed, closestPlayer, 17) then
-                NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(Missile)
-                while ENTITY.DOES_ENTITY_EXIST(Missile) do
-                    local targetCoords = v3.new(PED.GET_PED_BONE_COORDS(closestPlayer, 20781, 0, 0, 0))
-                    local missileCoords = v3.new(getEntityCoords(Missile))
-                    local look = v3.lookAt(missileCoords, targetCoords) --int v3.lookAt(int a, int b)
-                    local dir = v3.toDir(look)
-                    local direction = GetTableFromV3Instance(dir)
-                    --coordinates done
-                    -- aimbot time:
-                    ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(Missile, 1, direction.x * missile_speed, direction.y * missile_speed, direction.z * missile_speed, true, false, true, true)
-                    if missile_ptfx then
-                        GRAPHICS.USE_PARTICLE_FX_ASSET("core")
-                        GRAPHICS.START_PARTICLE_FX_NON_LOOPED_ON_ENTITY("exp_grd_rpg_lod", Missile, 0, 0, 0, 0, 0, 0, 0.8, false, false, false)
+        if (Missile ~= 0) then --check for missile here, we will create thread to track it.
+            util.create_thread(function ()
+                local msl = Missile --set local variable for the global Missile, to be able to target mutliple missiles at once.
+                local closestPlayer = GetClosestPlayerWithRange_PIDBlacklist(500, AIM_BLACKLIST)
+                if (closestPlayer) and (not PED.IS_PED_DEAD_OR_DYING(closestPlayer)) then
+                    if ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(localPed, closestPlayer, 17) then
+                        NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(msl)
+                        while ENTITY.DOES_ENTITY_EXIST(msl) do
+                            local targetCoords = v3.new(PED.GET_PED_BONE_COORDS(closestPlayer, 20781, 0, 0, 0))
+                            local missileCoords = v3.new(getEntityCoords(msl))
+                            local look = v3.lookAt(missileCoords, targetCoords) --int v3.lookAt(int a, int b)
+                            local dir = v3.toDir(look)
+                            local direction = GetTableFromV3Instance(dir)
+                            --coordinates done
+                            -- aimbot time:
+                            ENTITY.APPLY_FORCE_TO_ENTITY_CENTER_OF_MASS(msl, 1, direction.x * missile_speed, direction.y * missile_speed, direction.z * missile_speed, true, false, true, true)
+                            if missile_ptfx then
+                                GRAPHICS.USE_PARTICLE_FX_ASSET("core")
+                                GRAPHICS.START_PARTICLE_FX_NON_LOOPED_ON_ENTITY("exp_grd_rpg_lod", msl, 0, 0, 0, 0, 0, 0, 0.8, false, false, false)
+                            end
+                            --free v3
+                            v3.free(targetCoords)
+                            v3.free(missileCoords)
+                            v3.free(look)
+                            v3.free(dir)
+                            wait()
+                        end
                     end
-                    --free v3
-                    v3.free(targetCoords)
-                    v3.free(missileCoords)
-                    v3.free(look)
-                    v3.free(dir)
-                    wait()
                 end
-            end
+                util.stop_thread()
+            end)
         end
         wait()
     end
@@ -174,15 +172,6 @@ end
 local function toasttest()
     util.toast("activated!")
 end
-local test1
-local test2
-test1 = 0.5
-test2 = 0.5
-local test3
-test3 = false
-menu.toggle_loop(menuroot, "test", {}, "", function ()
-    test1, test2, test3 = MakeGuiButton(test1, test2, 0.005, 0.001, BlackText, WhiteText, WhiteText, 0.8, "Text1", "text2", 18, 348, toasttest, false, test3)
-end)
 
 --===================================================================================================================
 --===================================================================================================================

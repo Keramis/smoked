@@ -295,7 +295,7 @@ function CheckForControlPressedOnScreen(startx, starty, endx, endy, intcontrol)
     return false
 end
 
-function MakeGuiButton(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext1, stringtext2, buttonpressactivate, buttonpressdrag, funcToTrigger, commandToTrigger, defaultactive)
+function MakeGuiButton_Text(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext1, stringtext2, buttonpressactivate, buttonpressdrag, funcToTrigger, commandToTrigger, defaultactive)
     local mX, mY = GetCursorLocation() --get cursor location
     local retX, retY = x, y
     local ac
@@ -309,12 +309,12 @@ function MakeGuiButton(x, y, distfromtext, outlinewidth, colormain, coloroutline
         bc1 = DrawRect_Outline_MidPoint_Text(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext2)
     end
     if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressactivate) then
+        ac = not ac
         if funcToTrigger then
             funcToTrigger()
         elseif commandToTrigger then
             menu.trigger_commands(tostring(commandToTrigger))
         end
-        ac = not ac
     end
     if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressdrag) then
         retX = mX
@@ -330,6 +330,10 @@ function MakeGuiButton(x, y, distfromtext, outlinewidth, colormain, coloroutline
     ]]
 end
 
+function MakeGuiButton_Img(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext1, stringtext2, buttonpressactivate, buttonpressdrag, funcToTrigger, commandToTrigger, defaultactive)
+
+end
+
 function DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
     local localped = GetLocalPed()
     -- <> <> <> <> Background Stuff <> <> <> <> --
@@ -341,7 +345,6 @@ function DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
     -- <> <> <> <> Freeze Stuff <> <> <> <> --
     if hgui_freeze then
         ENTITY.FREEZE_ENTITY_POSITION(localped, true)
-        ENTITY.SET_ENTITY_ROTATION(localped, plrot.x, plrot.y, plrot.z, 2, true)
     else ENTITY.FREEZE_ENTITY_POSITION(localped, false) end
     -- <> <> <> <> Freeze Stuff <> <> <> <> --
 
@@ -352,7 +355,7 @@ end
 
 function DrawCursorGUI(hgui_cigarrette)
     -- <> <> <> <> Cursor Draw <> <> <> <> -- (drawn at the bottom to make cursor render over the thing)
-    HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
+    --HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
     local xx, yy = GetCursorLocation()
     DrawTexture(hgui_cigarrette, 0.006, 0.006, xx, yy, xx, yy, 0, WhiteText)
     -- <> <> <> <> Cursor Draw <> <> <> <> --
