@@ -42,6 +42,15 @@ players.dispatch_on_join()
 
 menu.divider(menuroot, "Smoked.lua")
 
+local r1, g1, b1
+local hh = 0
+local tick = 0
+
+menu.toggle_loop(menuroot, "Rainobw Text Test", {}, "", function ()
+    r1, g1, b1, hh = RainbowRGB(hh, 1, 1, 40)
+    directx.draw_text(0.5, 0.5, "sdlfk;aj;", 1, 0.8, r1, g1, b1, 1.0,  false)
+end)
+
 local oppressor_aimbot = menu.list(menuroot, "Oppressor Aimbot", {"smokeoppressoraim"}, "")
 local missile_speed = 100
 local missile_ptfx = false

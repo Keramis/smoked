@@ -15,6 +15,41 @@ function GetColorFrom255(r, g, b, a)
     return {r = red, g = green, b = blue, a = alpha}
 end
 
+function RainbowRGB(h, s, v, speed)
+    local hh = h
+    if hh >= 360 then
+        hh = 0
+    end
+    local rr, gg, bb = HSV_C(hh, s, v)
+    hh = hh + speed
+    return rr, gg, bb, hh --returns hh for reuse of the func
+end
+
+-- Converts HSV to RGB. (input and output range: 0 - 1)
+-- https://love2d.org/wiki/HSV_color
+function HSV_C(h, s, v)
+    h = h / 360 --360, for all degrees
+    if s <= 0 then return v,v,v end
+    h = h*6
+    local c = v*s
+    local x = (1-math.abs((h%2)-1))*c
+    local m,r,g,b = (v-c), 0, 0, 0
+    if h < 1 then
+        r, g, b = c, x, 0
+    elseif h < 2 then
+        r, g, b = x, c, 0
+    elseif h < 3 then
+        r, g, b = 0, c, x
+    elseif h < 4 then
+        r, g, b = 0, x, c
+    elseif h < 5 then
+        r, g, b = x, 0, c
+    else
+        r, g, b = c, 0, x
+    end
+    return r+m, g+m, b+m
+end
+
 function GetPlayerNameFromPed(ped)
     local playerID = NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED(ped)
     local playerName = NETWORK.NETWORK_PLAYER_GET_NAME(playerID)
