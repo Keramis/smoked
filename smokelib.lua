@@ -149,6 +149,19 @@ function GetClosestPlayerWithRange_PIDBlacklist(range, blacklistedPIDsTable)
     end
 end
 
+function GetGroundAtCoord(v3int)
+    local success, ground_z
+    if v3int then
+        local tbl = GetTableFromV3Instance(v3int)
+        repeat
+            STREAMING.REQUEST_COLLISION_AT_COORD(tbl.x, tbl.y, tbl.z)
+            success, ground_z = util.get_ground_z(tbl.x, tbl.y)
+            util.yield()
+        until success
+    end
+    return ground_z
+end
+
 function GetTableFromV3Instance(v3int)
     local tbl = {x = v3.getX(v3int), y = v3.getY(v3int), z = v3.getZ(v3int)}
     return tbl
@@ -257,12 +270,20 @@ function SilentAimbotShoot(target, legit, head, body, pelvis, legs, damage, weap
     end
 end
 
+--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===
+--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===
+--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===
+
 ---Array List---
 
 FEATURES = {
     {false, "Oppressor MKII Aimbot"},
     {false, "Silent Aimbot (Better)"}
 }
+
+--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===
+--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===
+--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===--===
 
 function GetIntFromStrTBL(tbl, str)
     for index, string in tbl do
@@ -363,10 +384,6 @@ function MakeGuiButton_Text(x, y, distfromtext, outlinewidth, colormain, colorou
         -active string (1/2). We will need to use this as a param for running the func next frame.
         -dragged x,y. We will need to use this as a param for running the func next frame.
     ]]
-end
-
-function MakeGuiButton_Img(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext1, stringtext2, buttonpressactivate, buttonpressdrag, funcToTrigger, commandToTrigger, defaultactive)
-
 end
 
 function DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
