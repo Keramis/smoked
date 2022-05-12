@@ -5,7 +5,6 @@ local getPlayerPed = PLAYER.GET_PLAYER_PED
 
 WhiteText = {r = 1.0, g = 1.0, b = 1.0, a = 1.0}
 BlackText = {r = 0, g = 0, b = 0, a = 1.0}
-BlackBG = {r = 0, g = 0, b = 0, a = 0.4}
 
 function GetColorFrom255(r, g, b, a)
     local red = r/255
@@ -184,10 +183,27 @@ function DrawRectWithOutline(x, y, width, height, colormain, colorpadding, amoun
     --right rectangle
     directx.draw_rect(x + width, y - amountpadding, amountpadding, height + amountpadding*2, colorpadding)
 end
+
 function DrawRectUsingMiddlePoint(pointx, pointy, width, height, color)
     directx.draw_rect(pointx - width * 0.5, pointy - height * 0.5, width, height, color)
     --ty murten for improving this
 end
+
+function DrawRectWithOutlineUsingMiddlePoint2(pointx, pointy, width, height, colormainR, colormainG, colormainB, colormainA, colorpaddingR, colorpaddingG, colorpaddingB, colorpaddingA, amountpadding)
+    --top left point is (pointx - width * 0.5), (pointy - height * 0.5)
+    local topLeft = {x = (pointx - width * 0.5), y = (pointy - height * 0.5)}
+    --main rectangle
+    directx.draw_rect(topLeft.x, topLeft.y, width, height, colormainR, colormainG, colormainB, colormainA)
+    --top rectangle outline
+    directx.draw_rect(topLeft.x, topLeft.y - amountpadding, width, amountpadding, colorpaddingR, colorpaddingG, colorpaddingB, colorpaddingA)
+    --bottom rectangle
+    directx.draw_rect(topLeft.x, topLeft.y + height, width, amountpadding, colorpaddingR, colorpaddingG, colorpaddingB, colorpaddingA)
+    --left rectangle
+    directx.draw_rect(topLeft.x - amountpadding, topLeft.y - amountpadding, amountpadding, height + amountpadding*2, colorpaddingR, colorpaddingG, colorpaddingB, colorpaddingA)
+    --right rectangle
+    directx.draw_rect(topLeft.x + width, topLeft.y - amountpadding, amountpadding, height + amountpadding * 2, colorpaddingR, colorpaddingG, colorpaddingB, colorpaddingA)
+end
+
 function DrawRectWithOutlineUsingMiddlePoint(pointx, pointy, width, height, colormain, colorpadding, amountpadding)
     --top left point is (pointx - width * 0.5), (pointy - height * 0.5)
     local topLeft = {x = (pointx - width * 0.5), y = (pointy - height * 0.5)}
@@ -202,6 +218,7 @@ function DrawRectWithOutlineUsingMiddlePoint(pointx, pointy, width, height, colo
     --right rectangle
     directx.draw_rect(topLeft.x + width, topLeft.y - amountpadding, amountpadding, height + amountpadding * 2, colorpadding)
 end
+
 function DrawRect_Outline_MidPoint_Text(pointx, pointy, amountpaddingfromtext, amountoutline, colormain, coloroutline, colortext, scaletext, stringtext)
     local txtw, txth = directx.get_text_size(stringtext, scaletext)
     DrawRectWithOutlineUsingMiddlePoint(pointx, pointy, txtw + (amountpaddingfromtext * 2), txth + (amountpaddingfromtext * 2), colormain, coloroutline, amountoutline)
@@ -214,14 +231,51 @@ function DrawRect_Outline_MidPoint_Text(pointx, pointy, amountpaddingfromtext, a
     local y2 = (pointy + txth + amountpaddingfromtext + amountoutline) --[[endy]]
     return {x1, y1, x2, y2}
 end
+
+function DrawRect_Outline_Midpoint_Img(pointx, pointy, amountpaddingfromimg, amountoutline, colormain, coloroutline, textureID, pixelX, pixelY, scaleX, scaleY, windowX, windowY, textureColor)
+    if not windowX then windowX = 1920 end
+    if not windowY then windowY = 1080 end
+    if not textureColor then textureColor = {r = 1.0, g = 1.0, b = 1.0, a = 1.0} end
+    --window X, Y | and texture color are optional; this will work if you don't pass them.
+    local imgW, imgH = GetTextureSize(windowX, windowY, pixelX, pixelY, scaleX, scaleY)
+    DrawRectWithOutlineUsingMiddlePoint(pointx, pointy, imgW + (amountpaddingfromimg * 2), imgH + (amountpaddingfromimg * 2), colormain, coloroutline, amountoutline)
+    DrawTexture(textureID, scaleX/2, scaleY/2, 0.5, 0.5, pointx, pointy, 0, textureColor) --use 0.5 for centering, because DirectX is DOGSHIT
+    --divide by 2 here ^^ for scale, because, again, directX sucks.
+    --return for calculating inputs in the area
+    local x1 = (pointx - imgW - amountpaddingfromimg - amountoutline) --[[startx]]
+    local y1 = (pointy - imgH - amountpaddingfromimg - amountoutline) --[[starty]]
+    local x2 = (pointx + imgW + amountpaddingfromimg + amountoutline) --[[endx]]
+    local y2 = (pointy + imgH + amountpaddingfromimg + amountoutline) --[[endy]]
+    return {x1, y1, x2, y2}
+end
+
 function DrawTexture(id, sizex, sizey, centerx, centery, posx, posy, rotation, color)
     directx.draw_texture(id, sizex, sizey, centerx, centery, posx, posy, rotation, color)
 end
+
 function GetTopLeftCornerOfText(textX, textY, string, scale)
     local textwidth, textheight = directx.get_text_size(string, scale)
     local newX = textX - (textwidth / 2)
     local newY = textY
     return newX, newY
+end
+
+function GetTextureSize(windowX, windowY, textureX, textureY, sizeX, sizeY)
+    local sx = windowX/textureX
+    local sy = windowY/textureY
+
+    local x, y
+    if (sx > sy) then
+        x = 1 * sizeX
+        y = (sx/sy) * sizeY
+    elseif (sy > sx) then
+        x = (sy/sx) * sizeX
+        y = 1 * sizeY
+    elseif (sx == sy) then
+        x = 1*sizeX
+        y = 1*sizeY
+    end
+    return x, y
 end
 function ShootBulletIgnoreEntity(coord1, coord2, dmg, p7, wphash, ownerped, audible, invis, speed, toIgnore, p14)
     MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY(coord1.x, coord1.y, coord1.z, coord2.x, coord2.y, coord2.z, dmg, p7, wphash, ownerped, audible, invis, speed, toIgnore, p14)
@@ -372,9 +426,11 @@ function MakeGuiButton_Text(x, y, distfromtext, outlinewidth, colormain, colorou
             menu.trigger_commands(tostring(commandToTrigger))
         end
     end
-    if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressdrag) then
-        retX = mX
-        retY = mY
+    if buttonpressdrag then
+        if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressdrag) then
+            retX = mX
+            retY = mY
+        end
     end
 
     return retX, retY, ac
@@ -384,6 +440,35 @@ function MakeGuiButton_Text(x, y, distfromtext, outlinewidth, colormain, colorou
         -active string (1/2). We will need to use this as a param for running the func next frame.
         -dragged x,y. We will need to use this as a param for running the func next frame.
     ]]
+end
+
+function MakeGuiButton_Img(x, y, distfromimg, outlinewidth, colorbg, coloroutline, colorimg1, colorimg2, pixelX, pixelY, scaleX, scaleY, windowX, windowY, img1, img2, buttonActive, buttonDrag, funcTrigger, commandTrigger, defaultActive)
+    local mx, my = GetCursorLocation()
+    local retX, retY = x, y
+    local ac
+    ac = defaultActive
+    local bc1
+    --HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
+    if not ac then
+        bc1 = DrawRect_Outline_Midpoint_Img(x, y, distfromimg, outlinewidth, colorbg, coloroutline, img1, pixelX, pixelY, scaleX, scaleY, windowX, windowY, colorimg1)
+    elseif ac then
+        bc1 = DrawRect_Outline_Midpoint_Img(x, y, distfromimg, outlinewidth, colorbg, coloroutline, img2, pixelX, pixelY, scaleX, scaleY, windowX, windowY, colorimg2)
+    end
+    if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonActive) then
+        ac = not ac
+        if funcTrigger then
+            funcTrigger()
+        elseif commandTrigger then
+            menu.trigger_commands(tostring(commandTrigger))
+        end
+    end
+    if buttonDrag then
+        if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonDrag) then
+            retX = mx
+            retY = my
+        end
+    end
+    return retX, retY, ac
 end
 
 function DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
@@ -409,6 +494,6 @@ function DrawCursorGUI(hgui_cigarrette)
     -- <> <> <> <> Cursor Draw <> <> <> <> -- (drawn at the bottom to make cursor render over the thing)
     --HUD._SET_MOUSE_CURSOR_ACTIVE_THIS_FRAME()
     local xx, yy = GetCursorLocation()
-    DrawTexture(hgui_cigarrette, 0.006, 0.006, xx, yy, xx, yy, 0, WhiteText)
+    DrawTexture(hgui_cigarrette, 0.006, 0.006, 0.5, 0.5, xx, yy, 0, WhiteText)
     -- <> <> <> <> Cursor Draw <> <> <> <> --
 end
