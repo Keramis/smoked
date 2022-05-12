@@ -238,13 +238,6 @@ function DrawTexture(id, sizex, sizey, centerx, centery, posx, posy, rotation, c
     directx.draw_texture(id, sizex, sizey, centerx, centery, posx, posy, rotation, color)
 end
 
-function GetTopLeftCornerOfText(textX, textY, string, scale)
-    local textwidth, textheight = directx.get_text_size(string, scale)
-    local newX = textX - (textwidth / 2)
-    local newY = textY
-    return newX, newY
-end
-
 function GetTextureSize(windowX, windowY, textureX, textureY, sizeX, sizeY)
     local sx = windowX/textureX
     local sy = windowY/textureY
