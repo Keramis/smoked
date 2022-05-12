@@ -3,6 +3,7 @@
 -- all made by me, no skids here. nope. nahh
 util.require_natives(1640181023)
 require("smokelib")
+require("smoke_colors")
 util.toast("loaded smokelib")
 require("Universal_WeaponsNamesHashesTable")
 util.toast("Loaded Universal Weapons Hashes")
@@ -10,8 +11,12 @@ util.keep_running()
 local alist = false
 local hgui = false
 local hgui_enabled = false
+--image/textures--
 local hgui_smoke = directx.create_texture(filesystem.resources_dir() .. "smoked.png")
 local hgui_cigarrette = directx.create_texture(filesystem.resources_dir() .. "cigarrette.png")
+local hgui_point = directx.create_texture(filesystem.resources_dir() .. "smoke_point.png")
+local hgui_check = directx.create_texture(filesystem.resources_dir() .. "smoke_check.png")
+local hgui_x = directx.create_texture(filesystem.resources_dir() .. "smoke_x.png")
 
 --ease of use variables
 local menuroot = menu.my_root()
@@ -44,11 +49,17 @@ menu.divider(menuroot, "Smoked.lua")
 
 local r1, g1, b1
 local hh = 0
-local tick = 0
 
 menu.toggle_loop(menuroot, "Rainobw Text Test", {}, "", function ()
-    r1, g1, b1, hh = RainbowRGB(hh, 1, 1, 40)
+    r1, g1, b1, hh = RainbowRGB(hh, 1, 1, 3)
     directx.draw_text(0.5, 0.5, "sdlfk;aj;", 1, 0.8, r1, g1, b1, 1.0,  false)
+end)
+
+menu.action(menuroot, "fa", {}, "", function ()
+    local vv = v3.new()
+    PATHFIND.GET_GPS_WAYPOINT_ROUTE_END(vv, true, 0.0, 0)
+    local vf = GetTableFromV3Instance(vv)
+    util.toast(vf.x .. " " .. vf.y .. " " .. vf.z)
 end)
 
 local oppressor_aimbot = menu.list(menuroot, "Oppressor Aimbot", {"smokeoppressoraim"}, "")
@@ -72,6 +83,8 @@ menu.toggle(oppressor_aimbot, FEATURES[1][2], {}, "", function (on)
                 local msl = Missile --set local variable for the global Missile, to be able to target mutliple missiles at once.
                 local closestPlayer = GetClosestPlayerWithRange_PIDBlacklist(500, AIM_BLACKLIST)
                 if (closestPlayer) and (not PED.IS_PED_DEAD_OR_DYING(closestPlayer)) then
+                    local lpc = v3.new(getEntityCoords(closestPlayer))
+                    local zcoord = getEntityCoords(closestPlayer).z
                     if ENTITY.HAS_ENTITY_CLEAR_LOS_TO_ENTITY(localPed, closestPlayer, 17) then
                         NETWORK.NETWORK_REQUEST_CONTROL_OF_ENTITY(msl)
                         while ENTITY.DOES_ENTITY_EXIST(msl) do
@@ -227,6 +240,17 @@ local tab1x, tab1y = 0.2, 0.1
 local blackBGAlpha = 0.4
 local hgui_freeze = false
 local hguilist = menu.list(menuroot, "Hacked Client GUI", {}, "")
+local mainGui = {
+    midpointx = 0.5,
+    midpointy = 0.5,
+    widthX = 0.5,
+    heightY = 0.6,
+    r = 0,
+    g = 0,
+    b = 0,
+    hue = 0
+}
+local button1 = {posX = 0.5, posY = 0.5, defaultActive = false}
 menu.toggle(hguilist, "Enable Hacked Client GUI", {}, "Bind this to a key.", function (toggle)
     hgui = toggle
     local plrot = ENTITY.GET_ENTITY_ROTATION(localped, 2)
@@ -234,7 +258,20 @@ menu.toggle(hguilist, "Enable Hacked Client GUI", {}, "Bind this to a key.", fun
         DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
         --draw shit here
 
-        DrawCursorGUI(hgui_cigarrette)
+        --
+        mainGui.r, mainGui.g, mainGui.b, mainGui.hue = RainbowRGB(mainGui.hue, 1, 1, 3)
+        local col = {r = mainGui.r, g = mainGui.g, b = mainGui.b, a = 1.0}
+        DrawRectWithOutlineUsingMiddlePoint(mainGui.midpointx, mainGui.midpointy, mainGui.widthX, mainGui.heightY, MainBlackBG, col, 0.001)
+        --
+
+        button1.posX, button1.posY, button1.defaultActive = MakeGuiButton_Img(
+        button1.posX, button1.posY,
+        0.003, 0, GreyInside, MainBlackBG, PureWhite, PureWhite,
+        800, 800, 0.01, 0.01, 1920, 1080, hgui_x, hgui_check, 24, 74,
+        false, "godmode", button1.defaultActive
+        )
+        ---
+        DrawCursorGUI(hgui_point)
         wait()
     end
     ENTITY.FREEZE_ENTITY_POSITION(GetLocalPed(), false)
