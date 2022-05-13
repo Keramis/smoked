@@ -353,31 +353,49 @@ function GetCursorLocation()
     return x, y
 end
 
-function CheckForControlJustPressedOnScreen(startx, starty, endx, endy, intcontrol)
+function CheckForControlJustPressedOnScreen(startx, starty, endx, endy, intcontrol, disabled)
     if startx > endx or starty > endy then
         print("you cannot have starting x/y be greater than end x/y!")
         util.toast("you cannot have starting x/y be greater than end x/y!")
         return nil
     end
     local cx, cy = GetCursorLocation()
+    if disabled then
+        PAD.DISABLE_CONTROL_ACTION(0, intcontrol, true)
+    end
     if ((cx >= startx) and (cx <= endx)) and ((cy >= starty) and (cy <= endy)) then
-        if PAD.IS_CONTROL_JUST_PRESSED(0, intcontrol) then
-            return true
+        if disabled then
+            if PAD.IS_DISABLED_CONTROL_JUST_PRESSED(0, intcontrol) then
+                return true
+            end
+        else
+            if PAD.IS_CONTROL_JUST_PRESSED(0, intcontrol) then
+                return true
+            end
         end
     end
     return false
 end
 
-function CheckForControlPressedOnScreen(startx, starty, endx, endy, intcontrol)
+function CheckForControlPressedOnScreen(startx, starty, endx, endy, intcontrol, disabled)
     if startx > endx or starty > endy then
         print("you cannot have starting x/y be greater than end x/y!")
         util.toast("you cannot have starting x/y be greater than end x/y!")
         return nil
     end
     local cx, cy = GetCursorLocation()
+    if disabled then
+        PAD.DISABLE_CONTROL_ACTION(0, intcontrol, true)
+    end
     if ((cx >= startx) and (cx <= endx)) and ((cy >= starty) and (cy <= endy)) then
-        if PAD.IS_CONTROL_PRESSED(0, intcontrol) then
-            return true
+        if disabled then
+            if PAD.IS_DISABLED_CONTROL_PRESSED(0, intcontrol) then
+                return true
+            end
+        else
+            if PAD.IS_CONTROL_PRESSED(0, intcontrol) then
+                return true
+            end
         end
     end
     return false
@@ -396,7 +414,7 @@ function MakeGuiButton_Text(x, y, distfromtext, outlinewidth, colormain, colorou
     elseif ac then -- if it's true, then we do text option 2
         bc1 = DrawRect_Outline_MidPoint_Text(x, y, distfromtext, outlinewidth, colormain, coloroutline, colortext, scaletext, stringtext2)
     end
-    if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressactivate) then
+    if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressactivate, true) then
         ac = not ac
         if funcToTrigger then
             funcToTrigger()
@@ -405,7 +423,7 @@ function MakeGuiButton_Text(x, y, distfromtext, outlinewidth, colormain, colorou
         end
     end
     if buttonpressdrag then
-        if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressdrag) then
+        if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonpressdrag, true) then
             retX = mX
             retY = mY
         end
@@ -432,7 +450,7 @@ function MakeGuiButton_Img(x, y, distfromimg, outlinewidth, colorbg, coloroutlin
     elseif ac then
         bc1 = DrawRect_Outline_Midpoint_Img(x, y, distfromimg, outlinewidth, colorbg, coloroutline, img2, pixelX, pixelY, scaleX, scaleY, windowX, windowY, colorimg2)
     end
-    if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonActive) then
+    if CheckForControlJustPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonActive, true) then
         ac = not ac
         if funcTrigger then
             funcTrigger()
@@ -441,7 +459,7 @@ function MakeGuiButton_Img(x, y, distfromimg, outlinewidth, colorbg, coloroutlin
         end
     end
     if buttonDrag then
-        if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonDrag) then
+        if CheckForControlPressedOnScreen(bc1[1], bc1[2], bc1[3], bc1[4], buttonDrag, true) then
             retX = mx
             retY = my
         end
@@ -464,7 +482,7 @@ function DrawBackgroundGUI(hgui_freeze, blackBGAlpha, hgui_smoke)
     -- <> <> <> <> Freeze Stuff <> <> <> <> --
 
     -- <> <> <> <> Attack Stuff <> <> <> <> --
-    PLAYER.DISABLE_PLAYER_FIRING(players.user(), true)
+    --PLAYER.DISABLE_PLAYER_FIRING(players.user(), true)
     -- <> <> <> <> Attack Stuff <> <> <> <> --
 end
 
