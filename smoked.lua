@@ -47,21 +47,6 @@ players.dispatch_on_join()
 
 menu.divider(menuroot, "Smoked.lua")
 
-local r1, g1, b1
-local hh = 0
-
-menu.toggle_loop(menuroot, "Rainobw Text Test", {}, "", function ()
-    r1, g1, b1, hh = RainbowRGB(hh, 1, 1, 3)
-    directx.draw_text(0.5, 0.5, "sdlfk;aj;", 1, 0.8, r1, g1, b1, 1.0,  false)
-end)
-
-menu.action(menuroot, "fa", {}, "", function ()
-    local vv = v3.new()
-    PATHFIND.GET_GPS_WAYPOINT_ROUTE_END(vv, true, 0.0, 0)
-    local vf = GetTableFromV3Instance(vv)
-    util.toast(vf.x .. " " .. vf.y .. " " .. vf.z)
-end)
-
 local oppressor_aimbot = menu.list(menuroot, "Oppressor Aimbot", {"smokeoppressoraim"}, "")
 local missile_speed = 100
 local missile_ptfx = false
@@ -123,30 +108,31 @@ menu.toggle(oppressor_aimbot, "Enable PTFX", {}, "Enables PTFX on the missile. M
 end)
 
 local silent_aimbot = menu.list(menuroot, "Better Silent Aimbot", {}, "")
-local silent_aimbot_chooseHash = 0
-local silent_aimbot_chooseWP = ""
-local silent_aimbot_show = false
-local silent_aimbot_legit = false
-local silent_aimbot_speed = -1
-local silent_aimbot_dmg = 60
-local silent_aimbot_head = false
-local silent_aimbot_body = false
-local silent_aimbot_pelvis = false
-local silent_aimbot_legs = false
+local silent_aimbot_settings = {
+    chooseHash = 0,
+    chooseWP = "",
+    show = false,
+    legit = false,
+    onlyLegit = false,
+    speed = -1,
+    dmg = 60,
+    head = false,
+    body = false,
+    pelvis = false,
+    legs = false
+}
 menu.toggle(silent_aimbot, FEATURES[2][2], {"smokesilentaim"}, "Improved silent aimbot, to disable firing upon shooting.", function (on)
     local ourPed = GetLocalPed()
     FEATURES[2][1] = on
     SilentAimbot = on
     while SilentAimbot do
-        if silent_aimbot_show then
-            DrawText(0.5, 0.05, "Using " .. tostring(silent_aimbot_chooseWP) .. " for Silent Aimbot", 1, 0.5, WhiteText, true)
+        if silent_aimbot_settings.show then
+            DrawText(0.5, 0.05, "Using " .. tostring(silent_aimbot_settings.chooseWP) .. " for Silent Aimbot", 1, 0.5, WhiteText, true)
         end
         if PED.IS_PED_SHOOTING(ourPed) then
             local targetPed = GetClosestPlayerWithRange(400)
-            util.toast("targeted: " .. GetPlayerNameFromPed(targetPed))
-            local time = WEAPON._GET_WEAPON_TIME_BETWEEN_SHOTS(silent_aimbot_chooseHash)
             if (not PED.IS_PED_DEAD_OR_DYING(targetPed)) and (not AIM_BLACKLIST[NETWORK.NETWORK_GET_PLAYER_INDEX_FROM_PED]) then
-                SilentAimbotShoot(targetPed, silent_aimbot_legit, silent_aimbot_head, silent_aimbot_body, silent_aimbot_pelvis, silent_aimbot_legs, silent_aimbot_dmg, silent_aimbot_chooseHash, silent_aimbot_speed)
+                SilentAimbotShoot(targetPed, silent_aimbot_settings.legit, silent_aimbot_settings.onlyLegit, silent_aimbot_settings.head, silent_aimbot_settings.body, silent_aimbot_settings.pelvis, silent_aimbot_settings.legs, silent_aimbot_settings.dmg, silent_aimbot_settings.chooseHash, silent_aimbot_settings.speed)
             end
         end
         wait()
@@ -154,29 +140,32 @@ menu.toggle(silent_aimbot, FEATURES[2][2], {"smokesilentaim"}, "Improved silent 
 end)
 menu.divider(silent_aimbot, "-=-=-=-=-=-=-=-=-")
 menu.toggle(silent_aimbot, "Draw Text for Weapon", {}, "", function (on)
-    silent_aimbot_show = on
+    silent_aimbot_settings.show = on
 end)
-menu.toggle(silent_aimbot, "Legit Mode", {}, "Bullets come from your head.", function (toggle)
-    silent_aimbot_legit = toggle
+menu.toggle(silent_aimbot, "Legit Mode", {}, "Bullets come from your head. Shoots through walls if not in LOS.", function (toggle)
+    silent_aimbot_settings.legit = toggle
 end)
+menu.toggle(silent_aimbot, "Only Legit Mode", {}, "Makes aimbot only work if you have LOS.", function (toggle)
+    silent_aimbot_settings.onlyLegit = toggle
+end) 
 menu.slider(silent_aimbot, "Damage (numbers may not be exact)", {"silentdamage"}, "", 0, 10000, 60, 5, function (val)
-    silent_aimbot_dmg = val
+    silent_aimbot_settings.dmg = val
 end)
 menu.slider(silent_aimbot, "Speed", {"silentspeed"}, "", -1, 10000, -1, 10, function (val)
-    silent_aimbot_speed = val
+    silent_aimbot_settings.speed = val
 end)
 local silent_aimbot_hitboxes = menu.list(silent_aimbot, "Pick Hitboxes", {}, "")
 menu.toggle(silent_aimbot_hitboxes, "Head", {}, "", function (toggle)
-    silent_aimbot_head = toggle
+    silent_aimbot_settings.head = toggle
 end)
 menu.toggle(silent_aimbot_hitboxes, "Body", {}, "", function (toggle)
-    silent_aimbot_body = toggle
+    silent_aimbot_settings.body = toggle
 end)
 menu.toggle(silent_aimbot_hitboxes, "Pelvis", {}, "", function (toggle)
-    silent_aimbot_pelvis = toggle
+    silent_aimbot_settings.pelvis = toggle
 end)
 menu.toggle(silent_aimbot_hitboxes, "Legs (both calves)", {}, "", function (toggle)
-    silent_aimbot_legs = toggle
+    silent_aimbot_settings.legs = toggle
 end)
 --Generate actions for picking weapons
 local silent_aimbot_weapons = menu.list(silent_aimbot, "Pick Weapon", {}, "")
@@ -186,13 +175,9 @@ for i = 1, #GLOBAL_WEAPONS_NAMES_HASHES_TABLE do
         local wphash = GetWPHashFromTable(GLOBAL_WEAPONS_NAMES_HASHES_TABLE, wpstr)
         util.toast("Chosen: " .. wpstr)
         util.toast("Chosen: " .. wphash)
-        silent_aimbot_chooseHash = wphash
-        silent_aimbot_chooseWP = wpstr
+        silent_aimbot_settings.chooseHash = wphash
+        silent_aimbot_settings.chooseWP = wpstr
     end)
-end
-
-local function toasttest()
-    util.toast("activated!")
 end
 
 --===================================================================================================================
@@ -250,7 +235,12 @@ local mainGui = {
     b = 0,
     hue = 0
 }
-local button1 = {posX = 0.5, posY = 0.5, defaultActive = false}
+local button1_offsets = {x = 0.273, y = 0.232} --this is where it is relative to the screen, our "screen offset"
+local button1 = {posX = (mainGui.midpointx - (0.5 - button1_offsets.x)), posY = (mainGui.midpointy - (0.5 - button1_offsets.y)), defaultActive = false}
+--doing 0.5 here allows us to get the offset that was originally based off of (0.5)
+local function displayCoordB1()
+    util.toast(math.floor(button1.posX*1000)/1000 .. " || " .. math.floor(button1.posY*1000)/1000)
+end
 menu.toggle(hguilist, "Enable Hacked Client GUI", {}, "Bind this to a key.", function (toggle)
     hgui = toggle
     local plrot = ENTITY.GET_ENTITY_ROTATION(localped, 2)
@@ -268,8 +258,11 @@ menu.toggle(hguilist, "Enable Hacked Client GUI", {}, "Bind this to a key.", fun
         button1.posX, button1.posY,
         0.003, 0, GreyInside, MainBlackBG, PureWhite, PureWhite,
         800, 800, 0.01, 0.01, 1920, 1080, hgui_x, hgui_check, 24, 74,
-        false, "godmode", button1.defaultActive
+        displayCoordB1, false, button1.defaultActive
         )
+        local text1 = {posX = button1.posX + 0.045, posY = button1.posY - 0.01, string = "Oppressor Aimbot", align = 1, scale = 0.4, color = PureWhite}
+        DrawText(text1.posX, text1.posY, text1.string, text1.align, text1.scale, text1.color, false)
+
         ---
         DrawCursorGUI(hgui_point)
         wait()
