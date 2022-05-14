@@ -169,6 +169,24 @@ end
 function DrawText(x, y, string, align, scale, color, force_in_bounds)
     directx.draw_text(x, y, string, align, scale, color, force_in_bounds)
 end
+function DrawFadeText(x, y, string, align, scale, color, force_in_bounds, secfadein, secstay, secfadeout)
+    local count = 0
+    while count < secfadein*60 do
+        local inputColor = {r = color.r, g = color.g, b = color.b, a = ((count/60)/secfadein)}
+        directx.draw_text(x, y, string, align, scale, inputColor, force_in_bounds)
+        count = count + 1
+    end
+    local count2 = 0
+    while count2 < secstay*60 do
+        directx.draw_text(x, y, string, align, scale, color, force_in_bounds)
+        count2 = count2 + 1
+    end
+    local count3 = 0
+    while count3 < secfadeout*60 do
+        local input2 = {r = color.r, g = color.g, b = color.b, a = 60/((count/60)/secfadein)}
+        directx.draw_text(x, y, string, align, scale)
+    end
+end
 function DrawRect(x, y, width, height, color)
     directx.draw_rect(x, y, width, height, color)
 end
@@ -258,7 +276,7 @@ end
 function ShootBulletIgnoreEntity(coord1, coord2, dmg, p7, wphash, ownerped, audible, invis, speed, toIgnore, p14)
     MISC.SHOOT_SINGLE_BULLET_BETWEEN_COORDS_IGNORE_ENTITY(coord1.x, coord1.y, coord1.z, coord2.x, coord2.y, coord2.z, dmg, p7, wphash, ownerped, audible, invis, speed, toIgnore, p14)
 end
-function SilentAimbotShoot(target, legit, head, body, pelvis, legs, damage, weaponHash, speed)
+function SilentAimbotShoot(target, legit, legit_only, head, body, pelvis, legs, damage, weaponHash, speed)
     local headc = PED.GET_PED_BONE_COORDS(target, 12844, 0, 0, 0)
     local bodyc = PED.GET_PED_BONE_COORDS(target, 24817, 0, 0, 0)
     local pelvisc = PED.GET_PED_BONE_COORDS(target, 11816, 0, 0, 0)
@@ -284,7 +302,7 @@ function SilentAimbotShoot(target, legit, head, body, pelvis, legs, damage, weap
             ShootBulletIgnoreEntity(ouroff, rcalfc, damage, true, weaponHash, localPed, true, false, speed, veh, true)
             ShootBulletIgnoreEntity(ouroff, lcalfc, damage, true, weaponHash, localPed, true, false, speed, veh, true)
         end
-    else
+    elseif (not legit_only) then
         local ouroff = ENTITY.GET_OFFSET_FROM_ENTITY_IN_WORLD_COORDS(target, 0, 0.5, 0)
         if head then
             ShootBulletIgnoreEntity(ouroff, headc, damage, true, weaponHash, localPed, true, false, speed, veh, true)
